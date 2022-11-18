@@ -25,3 +25,27 @@ variable "https_frontend_port_name" {
 variable "websockets_request_routing_rule_name" {
   default = "AppGatW_Websockets-rule"
 }
+
+variable "frondend_subnet_name" {
+  description = "This is the name of the frondend Subnet where the Application Gateway resides"
+}
+
+variable "resource_group_name" {
+  description = "This is the Resource Group Name"
+}
+
+variable "virtual_network_name" {
+  description = "This is the name of the virtual Network"
+}
+
+variable "frontend_public_ip" {
+  description = "this is the public ip for the Application gateway"
+}
+
+variable "resource_group_location" {
+  description = "This is the location(Region) of the Resource Group"
+}
+
+variable "app_gateway_name" {
+  description = "This is the name of the Application Gateway"
+}

@@ -1,32 +1,3 @@
-# Frontend Subnet
-resource "azurerm_subnet" "prod-cf-edge-0" {
-  name                 = "prod-cf-edge-0"
-  resource_group_name  = azurerm_resource_group.Production.name
-  virtual_network_name = azurerm_virtual_network.Production.name
-  address_prefixes     = var.frontend_subnet_address_prefixes
-}
-
-# Backend pool Subnet
-resource "azurerm_subnet" "prod-cf-core-0" {
-  name                 = "prod-cf-core-0"
-  resource_group_name  = azurerm_resource_group.Production.name
-  virtual_network_name = azurerm_virtual_network.Production.name
-  address_prefixes     = var.backend_subnet_address_prefixes
-}
-
-# Frontend IP address
-resource "azurerm_public_ip" "prod-ip" {
-  name                = "cf-prod"
-  resource_group_name = azurerm_resource_group.Production.name
-  location            = var.resource_location
-  allocation_method   = "Static"
-  sku                 = "Standard"
-}
-
-output "azure_public_ips_prod_cf" {
-  value = "azurerm_public_ip.prod-ip.ip_address"
-}
-
 #-----------------------------------------------------------------
 # Generating SSL certificates
 #-----------------------------------------------------------------
@@ -40,16 +11,16 @@ resource "random_password" "pfx-password" {
 
 # This resource converts the PEM certicate in PFX
 resource "pkcs12_from_pem" "certificate" {
-  cert_pem = var.dba_cert_pem
-  private_key_pem = var.dba_private_key_pem
+  cert_pem = var.cert_pem
+  private_key_pem = var.private_key_pem
   password = random_password.pfx-password.result
   #password = random_password.pfx-password[0].result
 }
 
 /*
 resource "pkcs12_from_pem" "dbe_certificate" {
-  cert_pem = var.dbe_cert_pem
-  private_key_pem = var.dbe_private_key_pem
+  cert_pem = var.cert_pem01
+  private_key_pem = var.private_key_pem01
   password = random_password.pfx-password.result
   #password = random_password.pfx-password[1].result
 }
@@ -58,10 +29,10 @@ resource "pkcs12_from_pem" "dbe_certificate" {
 #--------------------------------------------------------------------------------------------------------------
 # Application Gateway
 #--------------------------------------------------------------------------------------------------------------- 
-resource "azurerm_application_gateway" "prod-lb" {
-  name                = "db-cf-prod-public-lb"
-  resource_group_name = azurerm_resource_group.Production.name
-  location            = var.resource_location
+resource "azurerm_application_gateway" "appGateway" {
+  name                = var.app_gateway_name
+  resource_group_name = var.resource_group_name
+  location            = var.resource_group_location
 
   # WAF Configuration
   sku {
