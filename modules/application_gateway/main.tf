@@ -97,9 +97,34 @@ resource "azurerm_application_gateway" "prod-lb" {
     port = 443
   }
 
+  frontend_port {
+    name = var.websockets_frontend_port_name
+    port = 4443
+  }
+
   frontend_ip_configuration {
     name                 = var.frontend_ip_configuration_name
     public_ip_address_id = azurerm_public_ip.prod-ip.id
+  }
+  
+  probe {
+    name = var.probe_name
+    protocol = "Http"
+    host = "login.system.production.cf.demandbridge.io"
+    path = "/"
+    interval = 60
+    timeout = 60
+    unhealthy_threshold = 3
+  }
+
+   probe {
+    name = var.https_probe_name
+    protocol = "Https"
+    host = "login.system.production.cf.demandbridge.io"
+    path = "/"
+    interval = 60
+    timeout = 60
+    unhealthy_threshold = 3
   }
 
   backend_address_pool {
@@ -112,7 +137,7 @@ resource "azurerm_application_gateway" "prod-lb" {
     cookie_based_affinity = "Disabled" // "Enabled"
     port                  = 443
     protocol              = "Https"
-    request_timeout       = 15
+    request_timeout       = 60
   }
 
   backend_http_settings {
@@ -120,7 +145,7 @@ resource "azurerm_application_gateway" "prod-lb" {
     cookie_based_affinity = "Disabled" // "Enabled"
     port                  = 80
     protocol              = "Http"
-    request_timeout       = 15
+    request_timeout       = 60
   }
 
 # Listeners Configuration
@@ -154,7 +179,15 @@ resource "azurerm_application_gateway" "prod-lb" {
     rule_type                  = "Basic"
     http_listener_name         = var.https_listener_name
     backend_address_pool_name  = var.backend_address_pool_name
-    backend_http_settings_name = var.https_setting_name
+    backend_http_settings_name = var.http_setting_name
+  }
+
+  request_routing_rule {
+    name                       = var.websockets_request_routing_rule_name
+    rule_type                  = "Basic"
+    http_listener_name         = var.websockets_listener_name
+    backend_address_pool_name  = var.backend_address_pool_name
+    backend_http_settings_name = var.http_setting_name
   }
   
   redirect_configuration {
@@ -172,21 +205,4 @@ resource "azurerm_application_gateway" "prod-lb" {
     redirect_configuration_name = var.redirect_configuration_name
   }
 }
-# Health probes Configuration
-#  probe {
-#    interval = "15"
-#    name = var.prob_http_name
-#    protocol = "Http"
-#    path = ""
-#    timout = 15
-#    unhealthy_threshold = 5
-#  }
-#
-#  probe {
-#    interval = "15"
-#    name = var.prob_https_name
-#    protocol = "Https"
-#    path = ""
-#    timout = 15
-#    unhealthy_threshold = 5
-#  }
+
