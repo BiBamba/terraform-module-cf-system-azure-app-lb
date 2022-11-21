@@ -54,8 +54,8 @@ resource "azurerm_application_gateway" "appGateway" {
   }
 
   gateway_ip_configuration {
-    name      = "db-cf-prod-public-lb-ip-configuration"
-    subnet_id = azurerm_subnet.prod-cf-edge-0.id
+    name      = var.gw_ip-configuration_name
+    subnet_id = var.frondend_subnet_id
   }
 
   frontend_port {
@@ -75,7 +75,7 @@ resource "azurerm_application_gateway" "appGateway" {
 
   frontend_ip_configuration {
     name                 = var.frontend_ip_configuration_name
-    public_ip_address_id = azurerm_public_ip.prod-ip.id
+    public_ip_address_id = var.frontend_public_ip_id
   }
   
   probe {
