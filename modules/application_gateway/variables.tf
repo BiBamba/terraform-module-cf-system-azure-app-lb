@@ -10,52 +10,19 @@ variable "resource_group_location" {
   description = "This is the location(Region) of the Resource Group"
 }
 
-variable "frondend_subnet_name" {
+variable "frontend_subnet_name" {
   description = "This is the name of the frondend Subnet where the Application Gateway resides"
 }
 
-variable "frondend_subnet_id" {
-  description = "This is the id of the Frontend Subnet"
-}
+variable "address_space" {}
 
-variable "address_space" {
-  default = "10.21.0.0/16"
-}
+variable "frontend_subnet_address_prefixes" {}
 
-variable "frontend_subnet_address_prefixes" {
-  default = "10.21.0.0/24"
-}
+variable "backend_subnet_address_prefixes" {}
 
-variable "backend_subnet_address_prefixes" {
-  default = "10.21.1.0/24"
-}
-
-variable "websockets_frontend_port_name" {
-  default = "AppGatW-Websockets-port"
-}
-
-variable "https_frontend_port_name" {
-  default = "AppGatW-Https-port"
-}
-
-variable "https_frontend_port_name" {
-  default = "AppGatW-Http-port"
-}
-
-variable "frontend_public_ip_name" {
-  description = "this is the name of the public ip for the Application gateway"
-}
-
-variable "frontend_public_ip_id" {
-  description = "This is teh id of the public ip of the Application Gateway"
-}
 
 variable "app_gateway_name" {
   description = "This is the name of the Application Gateway"
-}
-
-variable "gw_ip-configuration_name" {
-  description = "This is the name of the gateway ip configuration"
 }
 
 variable "sku_name " {
@@ -70,58 +37,98 @@ variable "sku_capacity" {
   description = "The capacity of WAF configuration"
 }
 
-variable "min_capacity" {
-  description= "The minimum capacity in the autoscaling configuration"
+variable "autoscale_configuration" {
+  description = ""
+  default = {}
+  type = map(string)
+  # autoscale_configuration = { min_capacity = "", max_capacity = "" }
 }
 
-variable "max_capacity" {
-  description= "The maximum capacity in the autoscaling configuration"
+variable "waf_configuration" {
+  description = ""
+  default = {}
+  type = map(string)
+  # waf_configuration = { enabled = "", firewall_mode = "", rule_set_type = "", rule_set_version = ""}
 }
 
-variable "probe_name" {
-  description = "The http probe name"
+variable "gw_ip-configuration_name" {
+  description = "This is the name of the gateway ip configuration"
 }
 
-variable "https_probe_name" {
-  description = "The https probe name"
+variable "frontend_subnet_id" {
+  description = "This is the id of the Frontend Subnet"
 }
 
-variable "backend_address_pool_name" {
-  description = "The name of the backend address pool"
+variable "frontend_ports" {
+  type = map(object({
+    name = string
+    port = number
+  }))
 }
 
-variable "https_setting_name" {
-  description = "The name of the http setting for https " 
+variable "frontend_ip_configuration" {
+  type = object({
+    name = string
+    public_ip_address_id = string
+  })
 }
 
-variable "http_setting_name" {
-  description = "The name of the http setting for http " 
+variable "probes" {
+  type = list(object({
+    name = string
+    protocol = string
+    host = string
+    path = string
+    interval = number
+    timeout = number
+    unhealthy_threshold = number
+  }))
 }
 
-variable "https_listener_name" {
-  description = "The name of the http listeners for https protocol"
+variable "backend_address_pools" {
+  type = list(object({
+    name          = string
+    ip_addresses  = string
+  }))
 }
 
-variable "ssl_certificate_name" {
-  description = "The name of the ssl certificate of the https listeners"
+variable "backend_http_settings" {
+  type = list(object({
+    name                  = string
+    port                  = string
+    protocol              = string
+    request_timeout       = number
+    host_name             = string
+    probe_name             = string
+
+  }))
 }
 
-variable "listener_name" {
-  description = "The name of the http listeners for http protocol"
+variable "http_listeners" {
+  type = list(object({
+    name = string 
+    frontend_ip_configuration_name = string
+    frontend_port_name = string
+    host_name = string
+    protocol = string
+    ssl_certificate_name = string
+
+  }))
 }
 
-variable "https_request_routing_rule_name" {
-  description = "The name of the https request rule"
+variable "ssl_certificates" {
+  type = list(object({
+    name = string
+    data = string
+    password = string
+  }))
 }
 
-variable "websockets_request_routing_rule_name" {
-  default = "AppGatW_Websockets-rule"
-}
-
-variable "redirect_configuration_name" {
-  description = "The name of redirect configuration for http to https "
-}
-
-variable "http_request_routing_rule_name" {
-  description = "The name of the http request rule"
+variable "request_routing_rules" {
+  type = list(object({
+    name                       = string
+    http_listener_name         = string
+    backend_address_pool_name  = string
+    backend_http_settings_name = string
+  }))
 }
